@@ -1,0 +1,88 @@
+#Skrypt na Smoka z WvsP3
+#by Hexa
+
+command /klasa-smok <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "/od %arg% ender-dragon"
+			set {klasa.%arg%} to "Smok"
+			give 1 of magma of protection 10 named "&c&lOgnisty Podmuch" to arg
+			give 1 of ice of protection 10 named "&3&lLodowe Zamrozenie" to arg
+			give 1 of green dye of protection 10 named "&6&lSmocza Kula" to arg
+			give 5 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of red stained glass pane named "&eAktywuj Latanie" to arg
+			set arg's hunger level to 3
+			apply resistance 3 to arg for 999 days
+			apply absorption 10 to arg for 999 days
+
+#Latanie
+on rightclick:
+	{klasa.%player%} is "Smok"
+	name of player's tool is "&eAktywuj Latanie":
+		set player's tool to air
+		send player title "&6Aktywowano Latanie" with subtitle "&cLec, siej postrach w szeregach wroga!" for 5 seconds
+		set player's flight mode to true
+		set the player's fly speed to 0.1
+
+#Ognisty Podmuch		
+on rightclick with magma:
+	if name of tool of player is "&c&lOgnisty Podmuch":
+		set {czas.ogien.%player%} to difference between {uzycie.ogien.%player%} and now
+		if {czas.ogien.%player%} is less than 15 seconds:
+			send "&cMusisz odczekac &7%difference between 15 seconds and {czas.ogien.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie.ogien.%player%} to now
+			loop 80 times:
+				shoot falling fire from location of player at speed 0.5
+				push spawned entity forwards at speed 0.3
+				chance of 10%:
+					shoot fireball from player at speed 1
+					set {type.fireball.%uuid of shot projectile%} to "Ogien"
+				wait 0.1 seconds
+				
+on damage:
+	damage is caused by projectile
+	{type.fireball.%uuid of projectile%} is "Ogien":
+		set damage to 8
+
+#Lodowe Zamrozenie
+on rightclick with ice:
+	if name of tool of player is "&3&lLodowe Zamrozenie":
+		set {czas.lod.%player%} to difference between {uzycie.lod.%player%} and now
+		if {czas.lod.%player%} is less than 15 seconds:
+			send "&cMusisz odczekac &7%difference between 15 seconds and {czas.lod.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie.lod.%player%} to now
+			make player shoot snowball at speed 0.9
+			set {type.fireball.%uuid of shot projectile%} to "Zamrozenie"
+			make player shoot snowball at speed 1.1
+			set {type.fireball.%uuid of shot projectile%} to "Zamrozenie"
+		
+on projectile hit:
+	if {type.fireball.%uuid of projectile%} is "Zamrozenie":
+		set {_L} to location of projectile
+		loop all blocks in radius 4 of {_L}:
+			if loop-block is not air or tall grass or ice:
+				chance of 50%:
+					set {type.%loop-block%} to type of loop-block
+					set loop-block to ice
+		loop all entities in radius 5 of {_L}:
+			if name of loop-entity is not "%shooter%":
+				apply slowness 2 to loop-entity for 8 seconds
+				make shooter damage loop-entity by 4
+		wait 2 seconds
+		loop all blocks in radius 4 of {_L}:
+			if loop-block is ice:
+				set loop-block to {type.%loop-block%}
+	
+#Smocza Kula
+on rightclick:
+	if tool of player is green dye of protection 10 named "&6&lSmocza Kula":
+		set {czas.smocza.%player%} to difference between {uzycie.smocza.%player%} and now
+		if {czas.smocza.%player%} is less than 15 seconds:
+			send "&cMusisz odczekac &7%difference between 15 seconds and {czas.smocza.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie.smocza.%player%} to now
+			loop 20 times:
+				shoot small fireball from player at speed 1
+				wait 0.15 seconds

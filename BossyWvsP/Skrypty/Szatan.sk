@@ -1,0 +1,43 @@
+#Skrypt na Szatana z WvsP3
+#by Hexa
+
+command /klasa-szatan <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "skin set %arg% szatan"
+			set {klasa.%arg%} to "Szatan"
+			set {szybkosc::%arg%} to false
+			give 1 of stick of unbreaking 1 named "&5Laska Mroku" to arg
+			give 1 of sugar named "&cPiekielna Szybkosc" to arg
+			give 1 of clock named "&5Teleportacja" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 1 of stone hoe named "&2&lAtak Zniszczenia" to arg
+			give 1 of blaze powder named "&a&lPiekielne Zaklecia" to arg
+			give 64 splash potion of harming named "&5Mikstura Krzywdy I" to arg
+			give 30 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 10 to arg for 999 days
+			apply speed 2 to arg for 999 days
+			apply resistance 3 to arg for 999 days
+			
+#Piekielna Szybkosc
+on rightclick with sugar:
+	if name of tool of player is "&cPiekielna Szybkosc":
+		set {czas.speed.%player%} to difference between {uzycie.speed.%player%} and now
+		if {czas.speed.%player%} is less than 70 seconds:
+			send "&d&l[&c&lWvsP&d&l]&c&l: &cJuz zuzyles ta umiejetnosci!"
+		else:
+			send "&c[Piekielna Szybkosc] &bAktywowana!"
+			remove speed from player
+			apply speed 4 to player for 999 days
+			set {szybkosc::%player%} to true
+			set {uzycie.speed.%player%} to now
+
+on damage:
+	if {klasa.%victim%} is "Szatan":
+		if {wojownik::%attacker%} is true:
+			if {szybkosc::%victim%} is true:
+				remove speed from victim
+				apply speed 2 to victim for 999 days
+				set {szybkosc::%victim%} to false

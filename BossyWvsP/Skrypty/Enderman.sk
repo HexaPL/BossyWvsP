@@ -1,0 +1,96 @@
+#Skrypt na Endermana + Portal z WvsP3
+#by Hexa
+
+command /klasa-enderman <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "/od %arg% enderman"
+			set {klasa.%arg%} to "Enderman"
+			clear inventory of arg
+			give 1 of stick of unbreaking 1 named "&5Laska Mroku" to arg
+			give 1 of end stone named "&5Brama Portalu" with lore "&cStworz Magiczny portal,", "&cdo ktorego beda mogly", "&csie teleportowac potwory!", "&cW przypadku jego uszkodzenia przez wojownikow", "&cportal bedzie mogl zostac wylaczony,", "&cwtedy ten przedmiot pozwoli Ci", "&cgo otworzyc na nowo!" to arg
+			give 1 of iron ingot named "&9Niszcz Bloki" to arg
+			give 1 of clock named "&5Teleportacja" to arg
+			give 3 of snowball of power 1 named "&bZamrazajacy Pocisk" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+
+#Brama Portalu
+on script load:
+	set {portal.status} to off
+	set {portal.exist} to no
+	
+on rightclick with end stone:
+	if name of tool of arg is "&5Brama Portalu":
+		set {czas.brama.%player%} to difference between {uzycie.brama.%player%} and now
+		if {czas.brama.%player%} is less than 30 seconds:
+			send "%{wvsp}% &ePonownie mozesz uzyc czaru za &6&l%difference between 30 seconds and {uzycie.brama.%player%}%"
+		else:
+			if {portal.exist} is true:
+				if {portal.status} is true:
+					send "%{wvsp}% &cPortal jest wlaczony!"
+					stop
+				else:
+					send "%{wvsp}% &cPortal zostal ponownie wlaczony!"
+					set {portal.status} to true
+					set {uzycie.brama.%player%} to now
+					stop
+			else:
+				set {_pb} to block 10 meters above player
+				set block 10 meters above player to end stone
+				set {portal.cords} to location of block 2 meters above {_pb}
+				set {_ypb} to y-coordinate of {_pb}
+				loop all blocks in radius 3 of {_pb}:
+					if y-coordinate of loop-block is {_ypb}:
+						set loop-block to end stone
+				set {portal.exist} to true			
+				set {portal.status} to true
+				teleport player to {portal.cords}
+				broadcast "%{wvsp}%  &a%player% stworzyl Portal Teleportacyjny dla Potworow!"
+
+on place of end stone:
+	cancel event
+
+#Mechanizm wyłączania portalu
+on rightclick with end stone:
+	if {wojownik::%player%} is true:
+		if {portal.status} is true:
+			set {portal.status} to false
+			send "%{wvsp}% &aWylaczyles portal"
+			remove 1 of end stone from player
+		else:
+			send "%{wvsp}% &aPortal jest wylaczony!"
+
+#Teleport do portalu
+on rightclick:
+	if name of tool of player is "&bTeleport do portalu":
+		set {czas.brama.%player%} to difference between {uzycie.brama.%player%} and now
+		if {czas.brama.%player%} is less than 20 seconds:
+			send "%{wvsp}% &ePonownie mozesz uzyc czaru za &6&l%difference between 20 seconds and {uzycie.brama.%player%}%"
+		else:
+			loop 1 time:
+				if {portal.exist} is no:
+					send "%{wvsp}% &cPortal jest wylaczony"
+					exit loop
+				else:
+					if {portal.status} is off:
+						send "%{wvsp}% &cPortal jest wylaczony"
+						exit loop
+					else:
+						teleport player to {portal.cords}
+						send "%{wvsp}% &bZostales teleportowany do Portalu"
+			wait 1 tick
+			set tool of player to empty map named "&bTeleport do portalu"
+
+on leftclick:
+	if name of tool of player is "&bTeleport do portalu":
+		if {portal.status} is on:
+			send "%{wvsp}% &bPortal jest wlaczony"
+		else:
+			send "%{wvsp}% &cPortal jest wylaczony"
+
+#Zamrazajacy Pocisk
+on damage:
+	damage is caused by projectile
+	projectile is snowball:
+	name of tool of attacker is "&bZamrazajacy Pocisk":
+		apply slowness 2 to victim for 15 seconds

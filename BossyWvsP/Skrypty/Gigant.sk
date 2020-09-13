@@ -1,0 +1,18 @@
+#Skrypt na Giganta z WvsP3
+#by Hexa
+
+command /klasa-gigant <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "/od %arg% giant"
+			set {klasa.%arg%} to "Gigant"
+			give 1 of golden axe of sharpness 3 and unbreaking 5 named "&4Gigantus" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 1 of iron ingot named "&9Niszcz Bloki" to arg
+			give 15 splash potion of harming named "&5Mikstura Krzywdy I" to arg
+			give 5 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 20 to arg for 999 days
+			apply speed to arg for 999 days
+			apply resistance 4 to arg for 999 days

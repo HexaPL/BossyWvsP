@@ -1,0 +1,26 @@
+#Skrypt na Zjawe z WvsP3
+#by Hexa
+
+command /klasa-zjawa <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "/od %arg% ghast"
+			set {klasa.%arg%} to "Zjawa"
+			give 1 of fire charge named "&2&lOgnista Kula" to arg
+			give 1 of red stained glass pane named "&eAktywuj Latanie" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 20 splash potion of harming named "&5Mikstura Krzywdy I" to arg
+			give 3 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 5 to arg for 999 days
+			apply resistance 2 to arg for 999 days
+
+#Latanie
+on rightclick:
+	{klasa.%player%} is "Zjawa"
+	name of player's tool is "&eAktywuj Latanie":
+		set player's tool to air
+		send player title "&6Aktywowano Latanie" with subtitle "&cLec, siej postrach w szeregach wroga!" for 5 seconds
+		set player's flight mode to true
+		set the player's fly speed to 0.07

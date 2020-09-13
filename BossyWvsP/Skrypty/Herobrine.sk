@@ -1,0 +1,29 @@
+#Skrypt na Herobrine z WvsP3
+#by Hexa
+
+command /klasa-herobrine <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			set {klasa.%arg%} to "Herobrine"
+			give 1 of iron hoe of sharpness 6 and knockback 1 named "&bTrujaca Laska" to arg
+			give 1 of clock named "&5Teleportacja" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 1 of iron ingot named "&9Niszcz Bloki" to arg
+			give 1 of slime ball named "&bWysoki Podskok" to arg
+			give 1 of stone hoe named "&2&lAtak Zniszczenia" to arg
+			give 1 of blaze powder named "&a&lPiekielne Zaklecia" to arg
+			give 64 splash potion of harming named "&5Mikstura Krzywdy I" to arg
+			give 15 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 10 to arg for 999 days
+			apply speed 2 to arg for 999 days
+			apply resistance 2 to arg for 999 days
+
+#Trujaca Laska		
+on damage:
+	if {wojownik::%victim%} is true:
+		if attacker's tool is iron hoe named "Trujaca Laska":
+			chance of 75%:
+				cure victim
+				poison victim for 10 seconds

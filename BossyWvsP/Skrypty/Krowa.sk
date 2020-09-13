@@ -1,0 +1,42 @@
+#Skrypt na Krowe z WvsP3
+#by Hexa
+
+command /klasa-krowa <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "od %arg% mushroom-cow"
+			set {klasa.%arg%} to "Krowa"
+			give 1 of iron ingot named "&9Niszcz Bloki" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 3 of gunpowder named "&4&lAtomowka" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 10 to arg for 999 days
+			apply speed to arg for 999 days
+			apply resistance 2 to arg for 999 days
+		
+#Atomowka
+on rightclick with gunpowder:
+	if name of player's tool is "&4&lAtomowka":
+		set {czas.atomowka} to difference between {uzycie.atomowka} and now
+		if {czas.atomowka} is less than 5 seconds:
+			send "&cMusisz odczekac &7%difference between 5 seconds and {czas.atomowka}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie.atomowka} to now
+			loop all entities in radius 18 of player:
+				if name of loop-entity is not "%player%":
+					damage loop-entity by 0
+					set loop-entity's health to (loop-entity's health) - 6
+					if loop-entity's health is 0:
+						killPot(player, loop-entity)
+			create explosion of force 10 at player
+			wait 1 tick
+			loop all blocks in radius 10 of player:
+				chance of 25%:
+					if block above loop-block is air:
+						if loop-block is not air:
+							set block above loop-block to fire
+			chance of 90%:
+				set player's health to 0
+			if player's health is not 0:
+				send "&6&lUdalo Ci sie przezyc wybuch!"

@@ -1,0 +1,100 @@
+#Skrypt na Nekromantę z WvsP3
+#by Hexa
+
+variables:
+	{prefix.nekro} = "&8&l[&7&lARMIA NIEUMARLYCH&8&l]"
+
+command /klasa-nekromanta <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			set {klasa.%arg%} to "Nekromanta"
+			set {nekro.dusze::%arg%} to 0
+			give 1 of golden hoe of sharpness 10 and unbreaking 5 named "&7&lLaska Nekromanty" to arg
+			give 1 of fire charge named "&2&lOgnista Kula" to arg
+			give 1 of stone hoe named "&2&lAtak Zniszczenia" to arg
+			give 1 of popped chorus fruit named "&6&lOgnisty Wulkan" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 1 of zombie spawn egg of infinity named "&c&lPrzywolaj Legion" with lore "&lKliknij prawym aby co 15 sek,", "&7aby przywolac Legion!" to arg
+			give 1 of book of infinity named "&8&lCzarna Biblia"  with lore "&e&lZebrane Dusze: &c&l%{nekro.dusze::%arg%}%/2", "&7Zabijaj Wojownikow aby zebrac Dusze!", "&7Zbierz 2 Dusze aby przywolac", "&7Portal do zaswiatow i wezwac &cNieumarlych" to arg
+			give 1 of clock named "&5Teleportacja" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply speed 2 to arg for 999 days
+			apply resistance 3 to arg for 999 days
+			apply absorption 20 to arg for 999 days
+			
+#Laska Nekromanty
+on damage:
+	name of attacker's tool is "&7&lLaska Nekromanty":
+		chance of 25%:
+			remove blindness from victim
+			apply blindness to victim for 7 seconds
+		chance of 25%:
+			remove slowness from victim
+			apply slowness to victim for 7 seconds
+		chance of 25%:
+			remove nausea from victim
+			apply nausea to victim for 7 seconds
+		chance of 25%:
+			remove wither from victim
+			apply wither to victim for 7 seconds
+		chance of 25%:
+			remove regeneration from attacker
+			apply regeneration to attacker for 7 seconds
+			
+#Przywolaj Legion
+on rightclick:
+	name of player's tool is "&c&lPrzywolaj Legion":
+		cancel event
+		set {czas.legion.%player%} to difference between {uzycie.legion.%player%} and now
+		if {czas.legion.%player%} is less than 15 seconds:
+			send "&cMusisz odczekac &7%difference between 15 seconds and {czas.legion.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie.legion.%player%} to now
+			send "&cPrzywolales Mroczny Legion!"
+			loop 10 times:
+				spawn skeleton at player
+				set max health of spawned entity to 25
+				heal spawned entity
+				set name of spawned entity to "&4Piekielny Legion"
+				
+on spawn of skeleton:
+	if "%spawn reason%" is "customized":
+		wait 14 seconds
+		kill event-entity
+		
+on death of skeleton:
+	clear drops
+
+function targetPlayer(e: entity) :: player:
+	set {_target} to first element of all players in world of {_e}
+	loop all players in world of {_e}:
+		if distance between loop-player and {_e} is less than (distance between {_e} and {_target}):
+			if {wojownik.%loop-player%} is true:
+				set {_target} to loop-player
+	return {_target}
+			
+on entity target:
+	name of entity is "&4Piekielny Legion"
+	{potwor::%entity's target%} is true:
+		cancel event
+		targetPlayer(entity)
+
+on damage of player:
+	{potwor::%victim%} is true
+	"%attacker%" is "skeleton":
+		cancel event
+
+#Czarna Biblia
+on tool change:
+	name of player's tool is "&8&lCzarna Biblia":
+		set 1st line of lore of player's tool to "&e&lZebrane Dusze: &c&l%{nekro.dusze::%player%}%/2"
+
+on death:
+	{klasa.%attacker%} is "Nekromanta"
+	{nekro.dusze::%attacker%} is less than 2:
+		increase {nekro.dusze::%attacker%} by 1
+
+on rightclick:
+	name of player's tool is "&8&lCzarna Biblia":
+		send "&c&lW przygotowaniu :)"

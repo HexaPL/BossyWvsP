@@ -1,0 +1,172 @@
+variables:
+	{lore1.pot} = "&6***POTWORY***"
+	{wvsp} = "&d&l[&c&lWvsP&d&l]&c&l:"
+	{drop} = "&6[Drop]"
+
+on script load:
+	clear {bossy::*}
+	add "Blaze", "Gigant", "Herobrine", "Krowa", "Mag", "Magma", "Nekromanta", "Rycerz", "Smok", "Szatan", "Szlam", "Warlock", "Wither", "Zjawa" to {bossy::*}
+
+#Komenda na otrzymanie skrzynki wyboru klasy
+command /potwor:
+	trigger:
+		give 1 of chest named "&5Wybierz Potwora" to player
+		set {potwor::%player%} to true
+
+#Ikony bossów
+function getBoss(boss: string, lore: string) :: item:
+	if {_boss} is "Blaze":
+		set {_i} to orange dye named "&4&lBlaze" with lore "%{lore1.pot}%", "&aTo boss walczacy na dystans,", "&aposiadajacy specjalne ataki", "&aprzenikajace umocnienia!", "", "%{_lore}%"
+	else if {_boss} is "Gigant":
+		set {_i} to cocoa bean named "&4&lGigant" with lore "%{lore1.pot}%", "&aTo wielki, powolny aczkolwiek", "&aniesamowicie pancerny boss,", "&asiejacy ogromne", " &aspustoszenie w umocnieniach", "&ai szeregach wojownikow!", "", "%{_lore}%"
+	else if {_boss} is "Herobrine":
+		set {_i} to lapis lazuli named "&4&lHerobrine" with lore "%{lore1.pot}%", "&aTo Wladca wszystkich", "&amobow posiadajacy umiejetnosci", "&aswoich podwladnych,", "&adzieki ktorym szerzy", "&awsrod wojownikow prawdziwy terror!", "", "%{_lore}%"
+	else if {_boss} is "Krowa":
+		set {_i} to black dye named "&4&lKrowa" with lore "%{lore1.pot}%", "&aTo boss kamikadze", "&ao ogromnej sile razenia!", "&aBez problemu przebije", "&asie przez umocnienia,", "&apowodujac ogromne spustoszenie!", "", "%{_lore}%"
+	else if {_boss} is "Mag":
+		set {_i} to jungle boat named "&4&lMag" with lore "%{lore1.pot}%", "%{_lore}%"
+	else if {_boss} is "Magma":
+		set {_i} to birch boat named "&4&lMagma" with lore "%{lore1.pot}%", "&aTo skoczny boss posiadajacy", "&aataki na daleki jak i", "&akrotki dystans!", "", "%{_lore}%"
+	else if {_boss} is "Nekromanta":
+		set {_i} to totem of undying named "&4&lNekromanta" with lore "%{lore1.pot}%", "%{_lore}%"
+	else if {_boss} is "Rycerz":
+		set {_i} to cooked rabbit named "&4&lRycerz" with lore "%{lore1.pot}%", "&aMroczny Rycerz to dowodca", "&amrocznego legionu, posiada", "&aszybkiego nieumarlego wierzchowca", "&aoraz mroczne umiejetnosci", "&adzieki ktorym sieje postrach", "&aw sercach wojownikow!", "%{_lore}%"
+	else if {_boss} is "Smok":
+		set {_i} to dark oak boat named "&4&lSmok" with lore "%{lore1.pot}%", "&aTo ogromny boss", "&aktorego zadaniem jest", "&asiac spustoszenie", "&apo stronie wojownikow", "&aatakujac na bliski i sredni dystans!", "", "%{_lore}%"
+	else if {_boss} is "Szatan":
+		set {_i} to rabbit stew named "&4&lSzatan" with lore "%{lore1.pot}%", "&aPiekielna Istota", "&aWlada czarami ognia,", "&ajednoczesnie ogien potrafi go uleczyc", "&aRegeneruje sie poprzez zabijanie!", "&aEksplozja i Destrukcja to jego drugie imie!", "", "%{_lore}%"
+	else if {_boss} is "Szlam":
+		set {_i} to bone named "&4&lSzlam" with lore "%{lore1.pot}%", "&aTo boss ktory posiada ataki", "&adystansowe na blizsza odleglosc,", "&a przenikajace umocnienia wojownikow!", "%{_lore}%"
+	else if {_boss} is "Warlock":
+		set {_i} to cookie named "&4&lWarlock" with lore "%{lore1.pot}%", "&aWarlock to Najpotezniejszy", "&aMAG BITEWNY, wlada mrocznymi", "&azakleciami oraz swietnie walczy", "&aw zwarciu, doskonaly do PVP!", "", "%{_lore}%"
+	else if {_boss} is "Wither":
+		set {_i} to acacia wood door item named "&4&lWither" with lore "%{lore1.pot}%", "%{_lore}%"
+	else if {_boss} is "Zjawa":
+		set {_i} to spruce boat named "&4&lZjawa" with lore "%{lore1.pot}%", "%{_lore}%"
+	return {_i}
+
+#Menu wyboru klasy
+on rightclick with chest:
+	if name of tool of player is "&5Wybierz Potwora":
+		if {potwor::%player%} is true:
+			open chest with 6 rows named "&5Wybierz Potwora" to player
+			wait 1 tick
+			format gui slot (numbers between 27 and 35) of player with light gray stained glass named "&e&lPREMIUM" to do nothing
+			format gui slot (numbers between 18 and 26) of player with glass pane named "&7PODSTAWOWE" to do nothing
+			#Podstawowe - TODO
+			format gui slot 0 of player with lime dye named "&4&lEnderman" to do nothing
+			#Premium
+			set {_slot} to 36 
+			loop {bossy::*}:
+				format gui slot {_slot} of player with getBoss("%loop-value%", "&7Cooldown: &6TODO")
+				increase {_slot} by 1
+
+#Mechanizm wyboru klasy		
+on inventory click:
+	if inventory name of player's current inventory is "&5Wybierz Potwora":
+		cancel event
+		if clicked item is not air:
+			if name of clicked item is not "&e&lPREMIUM" or "&7PODSTAWOWE":
+				set {_T} to uncolored name of clicked item
+				if clicked slot is bigger than 35:
+					broadcast " "
+					broadcast "%{wvsp}%  &c%player% &7Wybral bossa &c%{_T}%!"
+					broadcast " "	
+				close inventory of player
+				clear inventory of player
+				wait 5 ticks
+				execute console command "/klasa-%{_T}% %player%"
+				send "%{wvsp}% &c&lWybrano potwora &e&l%{_T}%" to player
+				apply water breathing to player for 999 days
+				apply night vision to player for 999 days
+				#apply strength 3 to player for 8 seconds
+				#set {nospawnkill::%player%} to true
+				#wait 8 seconds
+				#set {nospawnkill::%player%} to false
+
+#Ochronki i zabezpieczenia		
+on damage:
+	damage is caused by fall or fire or burning or poison
+	{potwor::%victim%} is true:
+		cancel event	
+			
+on pick up:
+	{potwor::%player%} is true:
+		cancel event
+
+on place:
+	{potwor::%player%} is true:
+		cancel event
+		
+on hunger meter change:
+	{potwor::%player%} is true:
+		cancel event
+		
+on damage of player:
+	attacker is victim:
+		cancel event
+		
+on drop:
+	{potwor::%player%} is true:
+		cancel event
+
+on damage:
+	{potwor::%victim%} is true
+	{nospawnkill::%victim%} is true:
+		send "&b&lPotwor posiada aktywna ochrone (uzycie Portalu Endermana)!" to attacker
+		cancel event
+
+on command:
+	command contains "klasa-"
+	executor is player:
+		cancel event
+
+on death of player:
+	{klasa.%victim%} is not "Brak":
+		clear drops
+
+on respawn:
+	wait 1 tick
+	set {potwor::%player%} to true
+	set {wojownik::%player%} to false
+	clear inventory of player
+	give 1 of chest named "&5Wybierz Potwora" to player
+	#execute console command "skin set %player% defaultsteve"
+	execute console command "und %player%"
+	set player's fly speed to 0.1
+	if gamemode of player is not creative:
+		set player's flight mode to false
+	set {klasa.%player%} to "Brak"
+	set {szybkosc::%player%} to false
+	set {maska::%player%} to false
+
+#Slay
+command /slay:
+	trigger:
+		set health of player to 0
+
+#Komunikaty o zabójstwach	
+function killWoj(attacker: player, victim: entity):
+	set {_tool} to name of {_attacker}'s tool
+	send "&7Zakatowales na smierc &b%{_victim}%&7!" to {_attacker}
+	send "&7Zostales zabity przez &b%{_attacker}%&7!" to {_victim}
+	if {_tool} is not set:
+		broadcast "&d[☣] &e%{_attacker}% &7zabil &c%{_victim}%"
+	else:	
+		broadcast "&d[☣] &e%{_attacker}% &7zabil &c%{_victim}% &7uzywajac %{_tool}%"
+
+function killPot(attacker: player, victim: entity):
+	send "&7Zakatowales na smierc &b%{_victim}%&7!" to {_attacker}
+	send "&7Zostales zabity przez &b%{_attacker}%&7!" to {_victim}
+	set {_tool} to name of {_attacker}'s tool
+	broadcast "&d[☣] &c%{_attacker}% &7zabil &e%{_victim}% &7uzywajac %{_tool}%"
+	set {wojownik::%{_victim}%} to false
+	set {potwor::%{_victim}%} to true		
+
+on death:
+	attacker is set
+	"%type of attacker%" is "player":
+		if {potwor::%attacker%} is true:
+			killPot(attacker, victim)
+		else:
+			killWoj(attacker, victim)

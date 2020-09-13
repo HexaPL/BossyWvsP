@@ -1,0 +1,30 @@
+#Skrypt na Magme z WvsP3
+#by Hexa
+
+command /klasa-magma <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "/od %arg% magma-cube"
+			set {klasa.%arg%} to "Magma"
+			give 1 of fire charge named "&2&lOgnista Kula" to arg
+			give 1 of slime ball named "&bWysoki Podskok" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 15 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply jump boost 2 to arg for 999 days
+			apply speed 2 to arg for 999 days
+			apply resistance 2 to arg for 999 days
+			apply absorption 7 to arg for 999 days
+
+on damage:
+	{klasa.%victim%} is "Magma"
+	damage is caused by fire or burning:
+		cancel event
+		extinguish victim
+
+on damage:
+	{klasa.%victim%} is "Magma"
+	damage is caused by projectile
+	projectile is large fireball:
+		cancel event

@@ -1,0 +1,66 @@
+#Skrypt na Warlocka z WvsP3
+#by Hexa
+
+command /klasa-warlock <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			#execute console command "skin set %arg% warlock"
+			set {klasa.%arg%} to "Warlock"
+			give 1 of stone sword of protection 5 and sharpness 2 named "&7&lWielki Miecz Smierci" to arg
+			give 1 of melon seeds of unbreaking 1 named "&4&lPiekielna Aura" to arg
+			give 1 of stick of unbreaking 1 named "&5Laska Mroku" to arg
+			give 1 of stone hoe named "&2&lAtak Zniszczenia" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 1 of slime ball named "&bWysoki Podskok" to arg
+			give 64 splash potion of harming named "&5Mikstura Krzywdy I" to arg
+			give 1 of black wool named "&4&lMaska Warlocka" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 11 to arg for 999 days
+			apply speed 2 to arg for 999 days
+			apply resistance 3 to arg for 999 days
+			
+#Piekielna Aura
+on rightclick with melon seeds:
+	if name of tool of player is "&4&lPiekielna Aura":
+		set {czas.aura.%player%} to difference between {uzycie.aura.%player%} and now
+		if {czas.aura.%player%} is less than 70 seconds:
+			send "%{wvsp}% &cJuz zuzyles ta umiejetnosci!"
+			set {cool.aura.%player%} to difference between 70 seconds and {czas.aura.%player%}
+			send player title "&c&lMozesz uzyc aury..." with subtitle "&7...za %{cool.aura.%player%}%" for 5 seconds
+		else:
+			send "&3Aktywowales Piekielne Blogoslawienstwo!"
+			remove absorption and regeneration from player
+			apply absorption 8 to player for 999 days
+			apply regeneration to player for 20 seconds
+			set {uzycie.aura.%player%} to now
+			set {_loc} to location of player
+			set {_rad} to 0.25
+			set {_id} to 1
+			loop 12 times:
+				drawWarpRings style 1, particle "flame", center {_loc}, id "%player%.1.%{_id}%", rainbowMode false, scan false, height 0, radius {_rad}, ringCount 70, ringDensity 40, visibleRange 100
+				drawWarpRings style 1, particle "smoke", center {_loc}, id "%player%.2.%{_id}%", rainbowMode false, scan false, height 0, radius {_rad}, ringCount 70, ringDensity 40, visibleRange 100
+				increase {_rad} by 0.25
+				increase {_id} by 1
+			set {_id} to 1
+			set {_id1} to 1
+			wait 8 ticks
+			loop 12 times:
+				stopEffect id "%player%.1.%{_id}%"
+				stopEffect id "%player%.2.%{_id}%"
+				increase {_id} by 1
+						
+#Maska Warlocka
+on right click:
+	tool of player is black wool named "&4&lMaska Warlocka":
+		if helmet of player is air:
+			set helmet of player to black wool named "&4&lMaska Warlocka"
+			set tool of player to air
+			send "&6&l[Maska Warlocka] &bZalozyles &4&lMaske Warlocka &botrzymales dodatkowa sile!"
+			set {maska::%player%} to true
+			if {maska::%player%} is true:
+				apply strength 3 to player for 999 days
+				while name of helmet of player is "&4&lMaska Warlocka":
+					wait 1 second
+				set {maska::%player%} to false
+				remove strength from player

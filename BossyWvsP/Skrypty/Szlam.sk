@@ -1,0 +1,24 @@
+#Skrypt na Szlama z WvsP3
+#by Hexa
+
+command /klasa-szlam <player>:
+	trigger:
+		if {potwor::%arg%} is true:
+			execute console command "/od %arg% slime"
+			set {klasa.%arg%} to "Szlam"
+			give 1 of melon seeds named "&2Plugawy Atak" to arg
+			give 10 of grey dye named "&bMagiczna Mikstura Oslabiajaca" to arg
+			give 64 splash potion of poison to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply speed 1 to arg for 999 days
+			apply resistance 4 to arg for 999 days
+			apply absorption 7 to arg for 999 days
+
+#Oslabienie
+on rightclick:
+	tool of player is grey dye named "&bMagiczna Mikstura Oslabiajaca":
+		remove 1 of grey dye named "&bMagiczna Mikstura Oslabiajaca" from player
+		loop all blocks in radius 3 of player:
+			if loop-block is emerald block:
+				set loop-block to stone

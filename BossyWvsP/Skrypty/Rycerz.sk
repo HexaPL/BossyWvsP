@@ -1,0 +1,93 @@
+#Skrypt na Rycerza z WvsP3
+#by Hexa
+
+command /klasa-rycerz <player>:
+	trigger:
+		if {potwor::%arg%} is true:	
+			set {klasa.%arg%} to "Rycerz"
+			set {kon.rycerz::%arg%} to true
+			give 1 of stone sword of protection 5 and sharpness 2 named "&7&lWielki Mroczny Miecz" to arg
+			give 1 of stone sword of knockback 5 and unbreaking 5 named "&cDziki Szal" to arg
+			give 1 of stone hoe named "&2&lAtak Zniszczenia" to arg
+			give 1 of iron ingot named "&9Niszcz Bloki" to arg
+			give 1 of gunpowder named "&4Eksplozja" to arg
+			give 1 of bone named "&6&lRog Mrocznego Rycerza" to arg
+			give 64 splash potion of harming named "&5Mikstura Krzywdy I" to arg
+			give 15 splash potion of level 2 harming named "&5&lMikstura Krzywdy II" to arg
+			give 1 of empty map named "&bTeleport do portalu" to arg
+			wait 1 tick
+			apply absorption 15 to arg for 999 days
+			apply resistance 3 to arg for 999 days
+			apply speed to arg for 999 days
+			spawn skeleton horse at arg
+			set {rumak.%arg%} to spawned entity
+			apply speed to {rumak.%arg%} for 999 days
+			tame {rumak.%arg%} to arg
+			equip {rumak.%arg%} with saddle
+			make arg ride {rumak.%arg%}
+		
+		
+#Dziki Szal
+function spawnIngots(loc: location, p: player):
+	increase x-coordinate of {_loc} by random number between 0 and 1
+	increase y-coordinate of {_loc} by random number between 0.3 and 1.4
+	increase z-coordinate of {_loc} by random number between 0 and 1
+	drop iron ingot named "%random number between 0 and 1000%" with lore "Szal" at {_loc}
+	push dropped item (direction from {_p} to dropped item) at speed 0.5
+
+on rightclick with stone sword:
+	name of player's tool is "&cDziki Szal":
+		set {czas.dziki.%player%} to difference between {uzycie.dziki.%player%} and now
+		if {czas.dziki.%player%} is less than 2 seconds:
+			send "&d[&5INFO&d] Aby uzyc tego czaru, musisz poczekac &6%difference between 2 seconds and {czas.dziki.%player%}%"
+		else:
+			set {uzycie.dziki.%player%} to now
+			send "%{wvsp}% &c&lUzyles Dzikiego Szalu!"
+			loop all entities in radius 5 of player:
+				name of loop-entity is not "%player%"
+				health of loop-entity is not 0
+				loop-entity is not {rumak.%player%}:
+					reduce loop-entity's health by 5
+					if loop-entity's health is 0:
+						killPot(player, loop-entity)
+			loop 10 times:
+				spawnIngots(location of player, player)
+
+on item spawn:
+	lore of event-item is "Szal":
+		wait 3 seconds
+		delete event-entity
+			
+#Rog Mrocznego Rycerza
+on rightclick:
+	tool of player is bone named "&6&lRog Mrocznego Rycerza":
+		if {kon.rycerz::%player%} is false:
+			spawn skeleton horse at player
+			set {rumak.%player%} to spawned entity
+			apply speed to {rumak.%player%} for 999 days
+			equip {rumak.%player%} with saddle
+			tame {rumak.%player%} to player
+			make player ride {rumak.%player%}
+			set {kon.rycerz::%player%} to true
+			send "&2Przywolales swojego rumaka"
+		else:
+			apply invisibility to {rumak.%player%} for 5 seconds
+			set {kon.rycerz::%player%} to false
+			make player dismount
+			wait 1 tick
+			kill {rumak.%player%}
+			clear {rumak.%player%}
+			
+on damage:
+	victim is skeleton horse:
+		cancel event
+
+on death of skeleton horse:
+	clear drops
+
+on dismount:
+	apply invisibility to {rumak.%event-entity%} for 5 seconds
+	set {kon.rycerz::%event-entity%} to false
+	wait 1 tick
+	kill {rumak.%event-entity%}
+	clear {rumak.%event-entity%}

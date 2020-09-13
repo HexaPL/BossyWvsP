@@ -1,0 +1,325 @@
+#Skille wspólne dla kilku klas
+
+options:
+	#Plugawy Atak
+	p-range: 15
+	p-cooldown: 20
+	p-count: 5
+	p-particle: slime
+	p-effectrange: 0.3
+	p-lifetime: 5
+	p-cooldownmsg: &eAby zaatakowac Enderowym szlamem musisz poczekac &c&l%difference between 20 seconds and {czas1.plugawy.%player%}%
+	p-dmgrange: 2
+	p-damage: 4
+	#Wulkan
+	w-cooldown: 20
+	w-zasieg: 7
+	#Piekielne Zaklecia
+	id1: zaklecia1
+	id2: zaklecia2
+	item: blaze powder
+	name: &a&lPiekielne Zaklecia
+	cooldown: 7
+	cooldownmsg1: &eAby zaatakowac Fala Ognia musisz poczekac &c&l%difference between 7 second and {czas.zaklecia1.%player%}%
+	cooldownmsg2: &eAby zaatakowac Lodowym Podmuchem musisz poczekac &c&l%difference between 7 second and {czas.zaklecia2.%player%}%
+	range: 10
+	count: 7
+	particle1: flame
+	particle2: snowball
+	effectrange: 0.32
+	lifetime: 2
+	lifetime2: 5
+	dmgrange: 2
+	damage: 4
+
+#Atak Zniszczenia
+on leftclick with stone hoe:
+	if name of player's tool is "&2&lAtak Zniszczenia":
+		set {czas.zniszczenie.%player%} to difference between {uzycie.zniszczenie.%player%} and now
+		if {czas.zniszczenie.%player%} is less than 2 seconds:
+			send "&cMusisz odczekac &7%difference between 2 seconds and {czas.zniszczenie.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			make player shoot wither skull at speed 1.7
+			set {type.proj.%uuid of shot projectile%} to "Wither"
+			set {uzycie.zniszczenie.%player%} to now
+				
+on rightclick with stone hoe:
+	if name of player's tool is "&2&lAtak Zniszczenia":
+		set {czas2.zniszczenie.%player%} to difference between {uzycie2.zniszczenie.%player%} and now
+		if {czas2.zniszczenie.%player%} is less than 2 seconds:
+			send "&cMusisz odczekac &7%difference between 2 seconds and {czas2.zniszczenie.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			make player shoot wither skull at speed 1.7
+			set {type.proj.%uuid of shot projectile%} to "Wither"
+			set {uzycie2.zniszczenie.%player%} to now
+
+on damage:
+	damage is caused by projectile
+	{type.proj.%uuid of projectile%} is "Wither":
+		set damage to 0
+		if {klasa.%attacker%} is "Wither":
+			set {_dmg} to 1.5
+		else:
+			set {_dmg} to 1
+		set victim's health to (victim's health - {_dmg})
+		
+#Eksplozja
+on rightclick with gunpowder:
+	if name of player's tool is "&4Eksplozja":
+		if {klasa.%player%} is "Gigant" or "Krowa":
+			set {_cool} to 15 seconds
+		else:
+			set {_cool} to 10 seconds
+		set {czas.eksplozja.%player%} to difference between {uzycie.eksplozja.%player%} and now
+		if {czas.eksplozja.%player%} is less than {_cool}:
+			send "&cMusisz odczekac &7%difference between {_cool} and {czas.eksplozja.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			if {klasa.%player%} is "Gigant":
+				create explosion of force 6 at player
+				set {_range} to 7
+			else:
+				create explosion of force 2 at player
+				set {_range} to 4
+			set {uzycie.eksplozja.%player%} to now
+			if {klasa.%player%} is "Gigant":
+				set {_health} to 5.5
+			else:
+				set {_health} to 3
+			loop all entities in radius {_range} of player:
+				if name of loop-entity is not "%player%":
+					if {klasa.%player%} is "Gigant" or "Krowa":
+						reduce loop-entity's health by {_health}
+						if loop-entity's health is 0:
+							killPot(player, loop-entity)
+					else:
+						make player damage loop-entity by 7
+						
+#Ognista Kula
+on click with fire charge:
+	if name of tool of player is "&2&lOgnista Kula":
+		if {klasa.%player%} is "Blaze" or "Magma" or "Zjawa" or "Nekromanta":
+			set {czas.kula.%player%} to difference between {uzycie.kula.%player%} and now
+			if {czas.kula.%player%} is less than 7 seconds:
+				send "&cMusisz odczekac &7%difference between 7 seconds and {czas.kula.%player%}% &cprzed nastepnym uzyciem"
+			else:
+				set {uzycie.kula.%player%} to now
+				make player shoot fireball at speed 1.2
+				set {type.fireball.%uuid of shot projectile%} to "Boss"
+				loop 9999 times:
+					spawn falling fire at {_loc}
+					set no clip state of spawned entity to true
+					set {_loc} to location of shot projectile
+					increase y-coordinate of {_loc} by 1
+					if shot projectile is dead:
+						exit loop
+					wait 1 tick
+				
+on damage:
+	damage is caused by projectile
+	projectile is large fireball
+	{type.wither.%uuid of projectile%} is not set
+	{type.fireball.%uuid of projectile%} is "Boss":
+		set damage to 7.5
+		
+#Laska Mroku
+function laskaMroku(player: player):
+	loop all blocks in front of {_player}'s head:
+		set {_b} to location of loop-block
+		set {_p} to location of {_player}'s head
+		if distance between {_b} and {_p} is less than 15:
+			play ender signal at {_b} to all players
+			loop all entities in radius 2 of {_b}:
+				if name of loop-entity is not "%{_player}%":	
+					damage loop-entity by 3 hearts
+
+#LPM
+on leftclick with stick:
+	if name of player's tool is "&5Laska Mroku":
+		set {czas1.laska.%player%} to difference between {uzycie1.laska.%player%} and now
+		if {czas1.laska.%player%} is less than 5 seconds:
+			send "&eAby zaatakowac ponownie musisz poczekac &c&l%difference between 5 seconds and {czas1.laska.%player%}%"
+		else:
+			set {uzycie1.laska.%player%} to now
+			play sound "entity.lightning.impact" with volume 1 and pitch 0.02 at player 
+			laskaMroku(player)
+
+#PPM
+on rightclick with stick:
+	if name of player's tool is "&5Laska Mroku":
+		set {czas2.laska.%player%} to difference between {uzycie2.laska.%player%} and now
+		if {czas2.laska.%player%} is less than 10 seconds:
+			send "&eAby zaatakowac ponownie musisz poczekac &c&l%difference between 10 seconds and {czas2.laska.%player%}%"
+		else:
+			set {uzycie2.laska.%player%} to now
+			laskaMroku(player)
+
+#Niszcz Bloki
+on rightclick:
+	clicked block is set
+	clicked block is not air
+	tool of player is iron ingot named "&9Niszcz Bloki":
+		set {czas.niszcz.%player%} to difference between {uzycie.niszcz.%player%} and now
+		if {czas.niszcz.%player%} is less than 5 seconds:
+			send "&cMusisz odczekac &7%difference between 5 second and {czas.niszcz.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set event-block to air
+			create fake explosion at event-block
+			set {uzycie.niszcz.%player%} to now
+			
+#Plugawy Atak	
+on leftclick with melon seeds:
+	if name of tool of player is "&2Plugawy Atak":
+		set {czas1.plugawy.%player%} to difference between {uzycie1.plugawy.%player%} and now
+		if {czas1.plugawy.%player%} is less than {@p-cooldown} seconds:
+			send "{@p-cooldownmsg}"
+		else:
+			set {uzycie1.plugawy.%player%} to now
+			set {_p} to location of player's head
+			set {_b} to location of block {@p-range} meters in front of player's head
+			set {_rng} to {@p-range}
+			set {_loc} to getSpellIncrease({_p}, {_b}, {_rng})
+			set {_p} to location of player's head
+			set {_x} to x-coordinate of {_loc}
+			set {_y} to y-coordinate of {_loc}
+			set {_z} to z-coordinate of {_loc}
+			loop {_rng} times:
+				set {_p} to getSpellLoc({_p}, {_x}, {_y}, {_z})
+				drawDot count {@p-count}, particle {@p-particle}, XYZ {@p-effectrange}, {@p-effectrange}, {@p-effectrange}, center {_p}, visibleRange 320, pulseDelay 1, keepFor {@p-lifetime} ticks
+				play ender signal at {_p} to all players
+				loop all entities in radius {@p-dmgrange} of {_p}:
+					if name of loop-entity is not "%player%":
+						damage loop-entity by {@p-damage} hearts
+						
+on rightclick with melon seeds:
+	if name of tool of player is "&2Plugawy Atak":
+		set {czas2.plugawy.%player%} to difference between {uzycie2.plugawy.%player%} and now
+		if {czas2.plugawy.%player%} is less than 10 seconds:
+			send "&cMusisz odczekac &7%difference between 10 seconds and {czas2.plugawy.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie2.plugawy.%player%} to now
+			loop 10 times:
+				spawn slime in front of player's head
+				set slime size of spawned entity to 3
+				push spawned entity in direction of player at speed 1
+				wait 2 ticks
+
+on spawn of slime:
+	if "%spawn reason%" is "customized":
+		wait 7 seconds
+		delete event-entity
+	else:
+		set slime size of event-entity to 1
+		apply resistance 4 to event-entity for 999 days
+
+on death of slime:
+	clear drops
+	
+on damage of player:
+	{potwor::%victim%} is true
+	"%attacker%" is "slime":
+		cancel event
+		
+#Teleportacja			
+on click with clock:
+	if name of tool of player is "&5Teleportacja":
+		set {czas.tp.%player%} to difference between {uzycie.tp.%player%} and now
+		if {czas.tp.%player%} is less than 10 seconds:
+			send "&cMusisz odczekac &7%difference between 10 second and {czas.tp.%player%}% &cprzed nastepnym uzyciem"
+		else:	
+			set {_b} to block above targeted block
+			if {_b} is air:
+				teleport player to location of {_b}
+				set {uzycie.tp.%player%} to now
+				
+#Wulkan
+on rightclick:
+	if player's tool is popped chorus fruit named "&6&lOgnisty Wulkan":
+		set {czas.krag.%player%} to difference between {uzycie.krag.%player%} and now
+		if {czas.krag.%player%} is less than {@w-cooldown} seconds:
+			send "&cMusisz odczekac &7%difference between {@w-cooldown} seconds and {czas.krag.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			set {uzycie.krag.%player%} to now
+			set {_player} to location of player
+			set {_Y} to y-coordinate of player
+			loop all blocks in radius {@w-zasieg} of player:
+				if loop-block is not air:
+					set {type.%loop-block%} to type of loop-block
+					set loop-block to magma
+			set {_rad} to 2
+			set {_id} to 1
+			loop 4 times:
+				drawWarpRings style 1, particle "flame", center {_player}, id "%player%.wulkan.%{_id}%", rainbowMode false, scan false, height 0, radius {_rad}, ringCount 30, ringDensity 40, visibleRange 100
+				increase {_rad} by 1.5
+				increase {_id} by 1
+			wait 3 seconds
+			set {_id} to 1
+			loop 4 times:
+				stopEffect id "%player%.wulkan.%{_id}%"
+				increase {_id} by 1
+			loop all blocks in radius {@w-zasieg} of {_player}:
+				if loop-block is magma:
+					set loop-block to {type.%loop-block%}
+
+on damage:
+	{potwor::%victim%} is true
+	damage is caused by magma:
+		cancel event
+
+#Wysoki Podskok
+on rightclick with slime ball:
+	if name of player's tool is "&bWysoki Podskok":
+		set {czas.skok.%player%} to difference between {uzycie.skok.%player%} and now
+		if {czas.skok.%player%} is less than 15 seconds:
+			send "&cMusisz odczekac &7%difference between 15 seconds and {czas.skok.%player%}% &cprzed nastepnym uzyciem"
+		else:
+			send "&bUzyles Wysokiego Podskoku!"
+			push the player upwards at velocity 1.5
+			push the player horizontally forward at speed 4.5
+			set {uzycie.skok.%player%} to now
+				
+#Piekielne Zaklecia	
+on rightclick with {@item}:
+	if name of tool of player is "{@name}":
+		set {czas.{@id1}.%player%} to difference between {uzycie.{@id1}.%player%} and now
+		if {czas.{@id1}.%player%} is less than {@cooldown} seconds:
+			set {_cool} to difference between {@cooldown} seconds and {czas.{@id1}.%player%}
+			send "{@cooldownmsg1}"
+		else:
+			set {uzycie.{@id1}.%player%} to now
+			set {_p} to location 1 meter in front of player's head
+			set {_b} to location of block {@range} meters in front of player's head
+			set {_rng} to {@range}
+			set {_loc} to getSpellIncrease({_p}, {_b}, {_rng})
+			set {_p} to location 1 meter in front of player's head
+			set {_x} to x-coordinate of {_loc}
+			set {_y} to y-coordinate of {_loc}
+			set {_z} to z-coordinate of {_loc}
+			loop {_rng} times:
+				set {_p} to getSpellLoc({_p}, {_x}, {_y}, {_z})
+				drawDot count {@count}, particle {@particle1}, XYZ {@effectrange}, {@effectrange}, {@effectrange}, center {_p}, visibleRange 320, pulseDelay 1, keepFor {@lifetime} ticks
+				loop all entities in radius {@dmgrange} of {_p}:
+					if name of loop-entity is not "%player%":
+						damage loop-entity by {@damage} hearts
+						
+on leftclick with {@item}:
+	if name of tool of player is "{@name}":
+		set {czas.{@id2}.%player%} to difference between {uzycie.{@id2}.%player%} and now
+		if {czas.{@id2}.%player%} is less than {@cooldown} seconds:
+			set {_cool} to difference between {@cooldown} seconds and {czas.{@id2}.%player%}
+			send "{@cooldownmsg2}"
+		else:
+			set {uzycie.{@id2}.%player%} to now
+			set {_p} to location 1 meter in front of player's head
+			set {_b} to location of block {@range} meters in front of player's head
+			set {_rng} to {@range}
+			set {_loc} to getSpellIncrease({_p}, {_b}, {_rng})
+			set {_p} to location 1 meter in front of player's head
+			set {_x} to x-coordinate of {_loc}
+			set {_y} to y-coordinate of {_loc}
+			set {_z} to z-coordinate of {_loc}
+			loop {_rng} times:
+				set {_p} to getSpellLoc({_p}, {_x}, {_y}, {_z})
+				drawDot count {@count}, particle {@particle2}, XYZ {@effectrange}, {@effectrange}, {@effectrange}, center {_p}, visibleRange 320, pulseDelay 1, keepFor {@lifetime2} ticks
+				loop all entities in radius {@dmgrange} of {_p}:
+					if name of loop-entity is not "%player%":
+						damage loop-entity by {@damage} hearts
