@@ -13,5 +13,3 @@ Aby skrypty działały poprawnie:
 	  	block-fireball-explosions; 
 	  	block-fireball-block-damage; 
 	W plugins/Stacksize/config zmień "SPLASH_POTION:" z 4 na 64
-
-Masz problemy? Zajrzyj tutaj -> 
